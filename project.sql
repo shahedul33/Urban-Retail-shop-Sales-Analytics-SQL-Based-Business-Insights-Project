@@ -143,13 +143,20 @@ FROM "FactPayments" p
 JOIN "FactOrders" o ON p.order_id = o.order_id 
 GROUP BY p.method 
 ORDER BY p.method;
+
 --City preferences for specific payment methods
-SELECT c.city, p.method, COUNT(*) AS count 
+SELECT 
+    c.city, 
+    COUNT(*) FILTER (WHERE p.method = 'bKash') AS bkash_count,
+    COUNT(*) FILTER (WHERE p.method = 'COD') AS cod_count,
+    COUNT(*) FILTER (WHERE p.method = 'Nagad') AS nagad_count,
+    COUNT(*) FILTER (WHERE p.method = 'Debit Card') AS debit_card_count,
+    COUNT(*) FILTER (WHERE p.method = 'Credit Card') AS credit_card_count
 FROM "FactPayments" p 
 JOIN "FactOrders" o ON p.order_id = o.order_id 
 JOIN "DimCustomers" c ON o.customer_id = c."Customer_id"
-GROUP BY c.city, p.method 
-ORDER BY c.city, count DESC;
+GROUP BY c.city 
+ORDER BY (COUNT(*)) DESC;
 
 --Payment methods associated with higher-value orders
 SELECT py.method, AVG(v.order_value) AS avg_order_value 
@@ -236,4 +243,5 @@ GROUP BY 1, 2, 3, 4
 ORDER BY frequency DESC 
 
 LIMIT 15;
+
 
