@@ -134,12 +134,15 @@ GROUP BY method
 ORDER BY usage_count DESC;
 
 --Relationship between payment method and order status
-SELECT p.method, o.status, COUNT(*) AS count 
+SELECT 
+    p.method, 
+    COUNT(*) FILTER (WHERE o.status = 'Completed') AS completed_orders,
+    COUNT(*) FILTER (WHERE o.status = 'Cancelled') AS cancelled_orders,
+    COUNT(*) FILTER (WHERE o.status = 'Pending') AS pending_orders
 FROM "FactPayments" p 
 JOIN "FactOrders" o ON p.order_id = o.order_id 
-GROUP BY p.method, o.status 
-ORDER BY p.method, count DESC;
-
+GROUP BY p.method 
+ORDER BY p.method;
 --City preferences for specific payment methods
 SELECT c.city, p.method, COUNT(*) AS count 
 FROM "FactPayments" p 
@@ -233,3 +236,4 @@ GROUP BY 1, 2, 3, 4
 ORDER BY frequency DESC 
 
 LIMIT 15;
+
