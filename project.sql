@@ -99,13 +99,16 @@ FROM (
 ) sub;
 
 --Purchasing patterns by gender and category
-SELECT c."Gender", p.category, SUM(oi.quantity::INTEGER) AS total_quantity 
+SELECT 
+    p.category, 
+    SUM(oi.quantity::INTEGER) FILTER (WHERE c."Gender" = 'Male') AS male_quantity,
+    SUM(oi.quantity::INTEGER) FILTER (WHERE c."Gender" = 'Female') AS female_quantity
 FROM "FactOrderItems" oi 
 JOIN "FactOrders" o ON oi.order_id = o.order_id 
 JOIN "DimProducts" p ON oi.product_id = p.product_id 
 JOIN "DimCustomers" c ON o.customer_id = c."Customer_id" 
-GROUP BY c."Gender", p.category 
-ORDER BY c."Gender", total_quantity DESC;
+GROUP BY p.category 
+ORDER BY p.category;
 
 --Cities with the highest Average Order Value
 SELECT c.city, SUM(oi.quantity::INTEGER * p.unit_price::NUMERIC) / COUNT(DISTINCT o.order_id) AS city_aov 
@@ -228,4 +231,5 @@ JOIN "DimProducts" p2 ON oi2.product_id = p2.product_id
 WHERE p1.category <> p2.category 
 GROUP BY 1, 2, 3, 4 
 ORDER BY frequency DESC 
+
 LIMIT 15;
